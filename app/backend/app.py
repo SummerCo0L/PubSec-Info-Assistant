@@ -40,6 +40,27 @@ from approaches.tabulardataassistant import (
 from shared_code.status_log import State, StatusClassification, StatusLog
 from azure.cosmos import CosmosClient
 
+### newly added by MY ###
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+import requests
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.get("/user-roles")
+async def get_user_roles(token: str = Depends(oauth2_scheme)):
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.get("https://graph.microsoft.com/v1.0/me/appRoleAssignments", headers=headers)
+    if response.status_code == 200:
+        roles = response.json().get('value', [])
+        return {"roles": [role['appRoleId'] for role in roles]}
+    else:
+        raise HTTPException(status_code=response.status_code, detail="Failed to fetch user roles")
+### newly added by MY ###
+
+
 
 # === ENV Setup ===
 

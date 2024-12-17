@@ -9,6 +9,12 @@ import { Title } from "../../components/Title/Title";
 import { getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
 import { useEffect, useState } from "react";
 
+
+// newly added by MY //
+import ManageContentButton from "../../components/ManageContentButton";
+// newly added by MY //
+
+
 export const Layout = () => {
     const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | null>(null);
 
@@ -41,12 +47,17 @@ export const Layout = () => {
                                 <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
                                     Chat
                                 </NavLink>
-                            </li>
+                            // </li>
+                            // <li className={styles.headerNavLeftMargin}>
+                            //     <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                            //         Manage Content
+                            //     </NavLink>
+                            // </li>
+                            // newly added by MY //
                             <li className={styles.headerNavLeftMargin}>
-                                <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Manage Content
-                                </NavLink>
+                                <ManageContentButton />
                             </li>
+                            // newly added by MY //
                             {featureFlags?.ENABLE_MATH_ASSISTANT &&
                                 <li className={styles.headerNavLeftMargin}>
                                     <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>

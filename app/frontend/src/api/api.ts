@@ -19,6 +19,22 @@ import { ChatResponse,
     FetchCitationFileResponse,
     } from "./models";
 
+// newly added by MY //
+export async function getUserRoles(token: string): Promise<string[]> {
+    const response = await fetch("/user-roles", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch user roles");
+    }
+    const data = await response.json();
+    return data.roles;
+}
+// newly added by MY //
+
 export async function chatApi(options: ChatRequest, signal: AbortSignal): Promise<Response> {
     const response = await fetch("/chat", {
         method: "POST",
