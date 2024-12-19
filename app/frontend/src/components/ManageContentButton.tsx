@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getUserRoles } from "../api";
-import { getAccessToken } from "../auth";
+import { getAccessToken } from "../auth/auth";
 
 const ManageContentButton = () => {
     const [roles, setRoles] = useState<string[]>([]);
