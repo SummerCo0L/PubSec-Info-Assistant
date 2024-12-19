@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getUserRoles } from '../../api';
+import { getUserRoles } from '../api';
 import { getAccessToken } from '../auth';
 
 const ManageContentButton = () => {
