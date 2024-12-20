@@ -47,12 +47,6 @@ export const Layout = () => {
                                 <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
                                     Chat
                                 </NavLink>
-                            // </li>
-                            // <li className={styles.headerNavLeftMargin}>
-                            //     <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                            //         Manage Content
-                            //     </NavLink>
-                            // </li>
                             <li className={styles.headerNavLeftMargin}>
                                 <ManageContentButton />
                             </li>
