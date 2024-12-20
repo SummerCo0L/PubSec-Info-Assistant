@@ -53,11 +53,9 @@ export const Layout = () => {
                             //         Manage Content
                             //     </NavLink>
                             // </li>
-                            // newly added by MY //
                             <li className={styles.headerNavLeftMargin}>
                                 <ManageContentButton />
                             </li>
-                            // newly added by MY //
                             {featureFlags?.ENABLE_MATH_ASSISTANT &&
                                 <li className={styles.headerNavLeftMargin}>
                                     <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
