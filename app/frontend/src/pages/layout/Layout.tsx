@@ -48,7 +48,9 @@ export const Layout = () => {
                                     Chat
                                 </NavLink>
                             <li className={styles.headerNavLeftMargin}>
-                                <ManageContentButton />
+                                <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                    ManageContentButton
+                                </NavLink>
                             </li>
                             {featureFlags?.ENABLE_MATH_ASSISTANT &&
                                 <li className={styles.headerNavLeftMargin}>
