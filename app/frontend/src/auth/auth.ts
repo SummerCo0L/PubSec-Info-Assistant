@@ -6,7 +6,7 @@ const msalConfig = {
     auth: {
         clientId: "<clientId>", // insert your clientId here
         authority: "https://login.microsoftonline.com/<insert your tenant id here>", // insert your tenantid here
-        redirectUri: "https://infoasst-web-wfncg.azurewebsites.net/.auth/login/aad/callback"
+        redirectUri: "<Insert your reditect URI here>"
     }
 };
 
