@@ -4,8 +4,8 @@ import { PublicClientApplication } from "@azure/msal-browser";
 
 const msalConfig = {
     auth: {
-        clientId: "c3c9de9c-c343-4283-adcd-77ff1afaa324",
-        authority: "https://login.microsoftonline.com/a2c8f93f-126b-4596-a360-8941a8984b08",
+        clientId: "<clientId>", // insert your clientId here
+        authority: "https://login.microsoftonline.com/<insert your tenant id here>", // insert your tenantid here
         redirectUri: "https://infoasst-web-wfncg.azurewebsites.net/.auth/login/aad/callback"
     }
 };
