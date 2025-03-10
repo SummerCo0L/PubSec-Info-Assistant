@@ -41,7 +41,8 @@ const Tda = ({folderPath, tags}: Props) => {
   const [images, setImages] = useState<string[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
   const [maxCSVFileSize, setMaxCSVFileSize] = useState<getMaxCSVFileSizeType | null>(null);
-
+  // A list of strings representing the conversation history
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
 
   type ExampleModel = {
     text: string;
@@ -49,10 +50,74 @@ const Tda = ({folderPath, tags}: Props) => {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How many rows are there?", value: "How many rows are there?" },
-    { text: "What are the data types of each column?", value: "What are the data types of each column?" },
-    { text: "Are there any missing values in the dataset?", value: "Are there any missing values in the dataset?" },
-    { text: "What are the summary statistics for categorical data?", value: "What are the summary statistics for categorical data?" }
+    {
+      text: "Click to Classify file into its Data Classification", 
+      value: `You are a data classification expert.
+      Classify the last uploaded data/ document into its data classification. Do not take conversation history into account.
+      Look through the uploaded data/ document and answer the questions about it in a logical manner from point 1.1 until you arrive at the final answer (5.1.) for classification.
+      note: ARES = A*STAR RESEARCH ENTITIES
+
+      [DETERMINE GOVERNMENT OR ARES DATA]
+      1.1.
+      Does the data/ document consist of government/ statutory board data and systems? This could mean:
+        - Data is generated from government system, or
+        - Data is transmited through government enterprise network, or
+        - Data is used to serve statutory board functions, or
+        - Data is involved with government/ public sector.
+      If yes, proceed to point 2.1. If no, check if the data deals with ARES data and systems. This could mean:
+        - data is generated from ARES system, or
+        - data is transmitted through A*STAR NEtwork, or
+        - data is used to serve ARES functions
+      If yes, proceed to point 3.1. If no or unsure, mention that data is assumed to be from ARES data and systems and proceed to point 3.1.
+
+
+      [GOVT SECURITY CLASSIFICATION]
+      2.1.
+      Does unauthorized disclosure of the data/ document cause either i.) SERIOUS damage to agency (e.g., disrupt agency's critical processes, rendering it unable to discharge its functions)
+      or ii.) some damage to national interests/ security?
+      If yes, the {Security Classification} is "CONFIDENTIAL & ABOVE" and proceed to 4.1. If no, proceed to 1.2.
+
+      2.2. 
+      Does unauthorized disclosure of the data/ document cause SOME damage to agency (e.g., impediment of agency's processes resulting in hindrance to the discharge of its functions)?
+      If yes, the {Security Classification} is "RESTRICTED" and proceed to 4.1. If no, proceed to 1.3.
+
+      2.3. 
+      Is the data publicly available (e.g., websites)? If yes, the {Security Classification} is "OFFICIAL (OPEN)" and proceed to 4.1. If no, the {Security Classification} is "OFFICIAL (CLOSED)" and proceed to 4.1.
+
+
+      [ARES SECURITY CLASSIFICATION]
+      3.1.
+      If the data/ document is either i.) only meant to keep within a selected group, or ii.) unauthorized disclosure of the data/ document cause some damage to an individual or business 
+      (e.g., IP or tech disclosure details; industry-collaboration-sensitive information; data embargoed for publication/ paper submission; sensitve data not to be widely shared within A*STAR),
+      the {Security Classification} is "ARES CONFIDENTIAL & ABOVE" and proceed to 4.1. If no, proceed to 3.2.
+
+      3.2.
+      Is the data publicly available (e.g., ARES websites, ARES social media)? If yes, the {Security Classification} is "ARES PUBLIC" and proceed to 4.1.
+      If it is not publicly available and meant to be kept within ARES or internal between parties (e.g., eDMs; HR or Finance manuals; Raw scientific data), the {Security Classification} is "ARES PRIVATE" and proceed to 4.1.
+
+
+      [INFORMATION SENSITIVITY FRAMEWORK]
+      4.1.
+      Does unauthorized disclosure of the data/ document cause SERIOUS damage to an individual or business? 
+      (e.g., cause serious physical, financial or sustained emotional injury or social stigma to the individual; 
+      cause sustained financial loss such as in inability to conduct normal business operations, significant and irreversible loss of competitive advantage, or major damage to reputation).
+      If yes, the {INFORMATION SENSITIVITY} is "SENSITIVE HIGH" and proceed to 5.1. If no, proceed to 4.2.
+
+      4.2.
+      Does unauthorized disclosure of the data/ document cause ANY damage to an individual or business? (e.g., emotional distress to individual; reduced comeptitiveness or compromise to business interests)
+      If yes, the {INFORMATION SENSITIVITY} is "SENSITIVE NORMAL" and proceed to 5.1. If no, the {INFORMATION SENSITIVITY} is "NON-SENSITIVE" and proceed to 5.1.
+
+
+      [COMBINE SECURITY CLASSIFICATION AND INFORMATION SENSITIVITY]
+      5.1. Your FINAL recommendation for the data classification should in the following format:
+      “{Security Classification}”, “{INFORMATION SENSITIVITY}”.
+
+      Be clear and concise in your answer.
+      Answer in the following format:
+      “{Security Classification}”, “{INFORMATION SENSITIVITY}”
+      {Brief explanation on how you arrived at your answers}.
+      `
+    }
 ];
 
 interface Props {
@@ -78,6 +143,10 @@ const fetchImages = async () => {
     setOutput('');
     setRenderAnswer(true);
     setTimeout(async () => {
+      if (files.length === 0) {
+        alert("No files selected for upload.");
+        return;
+      }
       try {
         const query = setOtherQ(selectedQuery);
         if (eventSourceRef.current) {
@@ -107,19 +176,25 @@ const fetchImages = async () => {
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
-        setImages([])
+        setImages([]);
+        const trimmedHistory = conversationHistory.slice(-5).join("\n");
         const query = setOtherQ(selectedQuery);
+        const fullPrompt = trimmedHistory
+        ? `Conversation History:\n${trimmedHistory}\n\nUser: ${query}`
+        : `User: ${query}`;
+
         setOutput('');
         setRenderAnswer(true);
         if (fileu) {
-          const result = await processCsvAgentResponse(query, fileu);
+          const result = await processCsvAgentResponse(fullPrompt, fileu);
           setOutput(result.toString());
+          // Update conversation history with the latest exchange
+          setConversationHistory((prev) => [...prev, `User: ${query}`, `Assistant: ${result.toString()}`]);
           fetchImages();
           return;
-
         }
         else {
-          setOutput("no file file has been uploaded.")
+          setOutput("no file has been uploaded.")
         }
       } catch (error) {
         lastError = error;
@@ -130,6 +205,15 @@ const fetchImages = async () => {
     setOutput('An error occurred.');
   };
 
+  const handleExampleClick = async (value: string) => {
+    // Update the input value and selected query
+    // setInputValue(value);
+    setSelectedQuery(value);
+    // Immediately trigger the analysis
+    await handleAnswer();
+  };
+
+
   // handler called when files are selected via the Dropzone component
 
   const handleQueryChange = (value: string) => {
@@ -138,20 +222,20 @@ const fetchImages = async () => {
     // Handle the selected query here
 };
   
-  const handleOnChange = useCallback((files: any) => {
-    let filesArray = Array.from(files);
-  
-    filesArray = filesArray.filter((file: any) => file.type === 'text/csv');
-  
-    filesArray = filesArray.map((file: any) => ({
-      id: nanoid(),
-      file
+  const handleOnChange = useCallback((files: FileList) => {
+    const filesArray = Array.from(files).map((file: File) => ({
+        id: nanoid(),
+        file,
     }));
   
-    setFiles(filesArray as any);
+    setFiles(filesArray);
+    if (filesArray.length) {
+        setFile(filesArray[0].file); // set the first file for later processing
+    }
     setProgress(0);
     setUploadStarted(false);
   }, []);
+
 
   useEffect(() => {
     const fetchMaxCSVFileSize = async () => {
@@ -162,6 +246,7 @@ const fetchImages = async () => {
 
     fetchMaxCSVFileSize();
 }, []);
+
   // handle for removing files form the files list view
   const handleClearFile = useCallback((id: any) => {
     setFiles((prev: any) => prev.filter((file: any) => file.id !== id));
@@ -174,46 +259,66 @@ const fetchImages = async () => {
   // execute the upload operation
   const handleUpload = useCallback(async () => {
     try {
-      setFile(null);
-      const data = new FormData();
-      console.log("files", files);
+      // setFile(null);
       setUploadStarted(true);
-      files.forEach(async (indexedFile: any) => {  
-          var file = indexedFile.file as File;
+      const uploadPromises = files.map((indexedFile: any) => {
+        return new Promise<void>((resolve, reject) => {
+          const file = indexedFile.file as File;
           console.log('MAX_CSV_FILE_SIZE:', MAX_CSV_FILE_SIZE);
           if (file.size > MAX_CSV_FILE_SIZE) {
-            alert(`File is too large. Please upload a file smaller than ${maxCSVFileSize?.MAX_CSV_FILE_SIZE} MB.`);
+            alert(
+              `File is too large. Please upload a file smaller than ${maxCSVFileSize?.MAX_CSV_FILE_SIZE} MB.`
+            );
             setUploadStarted(false);
+            reject();
             return;
+          }
+  
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/file", true);
+  
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentComplete = (event.loaded / event.total) * 100;
+              setProgress(percentComplete);
             }
-            Papa.parse(file, {
-              header: true,
-              dynamicTyping: true,
-              complete: async function(results) {
-                data.append("file", file);
-                console.log("Finished:", results.data);
-                // Here, results.data is your dataframe
-                // You can set it in your state like this:
-                setDataFrame(results.data as object[]);
-                try {               
-                  const response = await postTd(file).then((response) => {
-                    setProgress(100);
-                    setFileUploaded(true);
-                    console.log('Response from server:', response);
-                  }).catch((error) => {console.log(error);}); 
-                  
-                } catch (error) {
-                  console.error('Error posting CSV:', error);
-                }
-              }
-            });
-            setFile(file)
+          };
+  
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              setProgress(100);
+              console.log(`File posted successfully: ${xhr.responseText}`);
+              // Set the file so it will be available for analysis
+              setFile(file);
+              resolve();
+            } else {
+              console.error("Error posting file:", xhr.statusText);
+              reject();
+            }
+          };
+  
+          xhr.onerror = () => {
+            console.error("Error posting file:", xhr.statusText);
+            reject();
+          };
+  
+          const data = new FormData();
+          data.append("file", file);
+          data.append("file_path", folderPath === "" ? file.name : `${folderPath}/${file.name}`);
+          if (tags.length > 0) {
+            data.append("tags", tags.map(encodeURIComponent).join(","));
+          }
+  
+          xhr.send(data);
+        });
       });
+      await Promise.all(uploadPromises);
+      setUploadStarted(false);
     } catch (error) {
-      console.error('Error uploading files: ', error);
+      console.error("Error uploading files: ", error);
     }
+  }, [files, MAX_CSV_FILE_SIZE, maxCSVFileSize, folderPath, tags]);
 
-  }, [files]);
 
 // set progress to zero when there are no files
   useEffect(() => {
@@ -306,7 +411,7 @@ const handleCloseEvent = () => {
     <div className={cstyle.App} >
     <TableSearchFilled fontSize={"6rem"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Supported File Types" />
     <h1 className={cstyle.EmptyStateTitle}>
-      Tabular Data Assistant
+      Data Classification
     </h1>
     <span className={styles.chatEmptyObjectives}>
       <i className={cstyle.centertext}>Information Assistant uses AI. Check for mistakes.</i> <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer"> Transparency Note</a>
@@ -319,7 +424,7 @@ const handleCloseEvent = () => {
 
     <DocumentDataFilled fontSize={"40px"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Data" />
             <span className={cstyle.EmptyObjectivesListItemText}><b>Data</b><br />
-                csv<br />
+                csv, pdf, doc, docx, txt, ppt, pptx<br />
             </span>
             <span className={cstyle.EmptyObjectivesListItemText}>
             Max file size: {maxCSVFileSize?.MAX_CSV_FILE_SIZE} MB
@@ -329,7 +434,7 @@ const handleCloseEvent = () => {
       
       {/* canvas */}
       <div className={styles.canvas_wrapper}>
-        <DropZone onChange={handleOnChange} accept={files} />
+        <DropZone onChange={handleOnChange} accept={[".csv", ".pdf", ".doc", ".docx", ".txt", ".ppt", ".pptx"]} />
       </div>
 
       {/* files listing */}
@@ -365,19 +470,19 @@ const handleCloseEvent = () => {
       ) : null}
     </div>
     
-    <p>Select an example query:</p>
+    {/* <p>Select an example query:</p> */}
     <div >
         <ul className={estyles.examplesNavList}>
-            {EXAMPLES.map((x, i) => (
-                <li key={i}>
-                    <Example text={x.text} value={x.value} onClick={handleQueryChange} />
+            {EXAMPLES.map((example, index) => (
+                <li key={index}>
+                    <Example text={example.text} value={example.value} onClick={() => handleExampleClick(example.value)} />
                 </li>
             ))}
         </ul>
     <div >
     
     <br></br>
-    <p>Ask a question about your CSV:</p>
+    <p>Ask a question about your file:</p>
     <input
       className={cstyle.inputField}
       type="text"
@@ -386,16 +491,16 @@ const handleCloseEvent = () => {
       onChange={(e) => setInputValue(e.target.value)}
     />
      <div className={cstyle.buttonContainer}>
-    <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
-    <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
+    {/* <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button> */}
+    <Button variant="secondary" onClick={handleAnswer}>Enter</Button>
     </div>
     { (
       <div style={{width: '100%'}}>
-        <h2>Tabular Data Assistant Response:</h2>
+        <h2>Agent Response:</h2>
         <div>
           { renderAnswer && 
           <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} classNames={cstyle.centeredAnswerContainer} nonEventString={output} onStreamingComplete={handleCloseEvent} typingSpeed={10} /> }
-        </div>
+        {/* </div>
         <h2>Generated Images:</h2>
         <div>
           {images.length > 0 ? (
@@ -409,7 +514,7 @@ const handleCloseEvent = () => {
             ))
           ) : (
             <p>No images generated</p>
-          )}
+          )} */}
         </div>
         <div className={cstyle.raiwarning}>AI-generated content may be incorrect</div>
 
@@ -421,9 +526,9 @@ const handleCloseEvent = () => {
       
     </div>
     
-    <div className={cstyle.centeredContainer}>
+    {/* <div className={cstyle.centeredContainer}>
     <details style={{ width: '100%' }}>
-  <summary>See Dataframe</summary>
+  <summary>See Dataframe (if file is csv)</summary>
   <div style={{ width: '100%', height: '500px', overflow: 'auto', direction: 'rtl'  }}>
   <div style={{ direction: 'ltr' }}>
   <DetailsList
@@ -438,7 +543,7 @@ const handleCloseEvent = () => {
 </div>
   </div>
 </details>
-    </div>
+    </div> */}
     </div>
 </div>
   );

@@ -7,6 +7,8 @@ import glob
 import warnings
 import io
 import tempfile
+import pandas as pd
+from io import StringIO
 from dotenv import load_dotenv
 from PIL import Image
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
@@ -15,11 +17,14 @@ from langchain_openai import AzureChatOpenAI
 from langchain_community.agent_toolkits.load_tools import load_tools
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 
+
+
 warnings.filterwarnings('ignore')
 load_dotenv()
 
 OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
 OPENAI_DEPLOYMENT_NAME =  os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+# OPENAI_DEPLOYMENT_NAME =  os.getenv("o3-mini")
 
 if os.environ.get("AZURE_OPENAI_AUTHORITY_HOST") == "AzureUSGovernment":
     AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
@@ -45,6 +50,7 @@ agent_imgs = []
 def refreshagent():
     global pdagent
     pdagent = None
+    
 def get_image_data(image_path):
     with Image.open(image_path) as img:
         img_byte_arr = io.BytesIO()
@@ -124,3 +130,62 @@ def process_agent_response(question, df):
         if "output" in chunk:
             output = f'Final Output: ```{chunk["output"]}```'
             return output
+
+
+# Function to process uploaded file
+def process_uploaded_file(file_bytes: bytes, filename: str):
+    """
+    Process an uploaded file (CSV, PDF, or Word) and return a pandas DataFrame.
+    
+    For CSV, it returns the parsed dataframe.
+    For PDF or DOCX, it extracts the text and creates a one-column dataframe.
+    """
+    ext = os.path.splitext(filename)[1].lower()
+    
+    if ext == ".csv":
+        # Decode and load CSV into a DataFrame
+        return pd.read_csv(StringIO(file_bytes.decode('utf-8-sig')))
+    
+    elif ext == ".pdf":
+        try:
+            import PyPDF2
+        except ImportError:
+            raise ImportError("PyPDF2 is required to process PDF files. Please install it.")
+        reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+        # Wrap all extracted text into a single-row dataframe
+        # return pd.DataFrame({"text": [text]})
+        return text
+    
+    elif ext in [".docx", ".doc"]:
+        try:
+            import docx
+        except ImportError:
+            raise ImportError("python-docx is required to process Word files. Please install it.")
+        document = docx.Document(io.BytesIO(file_bytes))
+        full_text = "\n".join([para.text for para in document.paragraphs])
+        # return pd.DataFrame({"text": [full_text]})
+        return full_text
+
+    elif ext in [".pptx", ".ppt"]:
+        try:
+            from pptx import Presentation
+        except ImportError:
+            raise ImportError("python-pptx is required to process PPTX/PPT files. Please install it.")
+        prs = Presentation(io.BytesIO(file_bytes))
+        text = ""
+        for slide in prs.slides:
+            for shape in slide.shapes:
+                if hasattr(shape, "text") and shape.text:
+                    text += shape.text + "\n"
+        if not text:
+            text = "No text could be extracted from the PPT file."
+        # return pd.DataFrame({"text": [text]})
+        return text
+    
+    else:
+        raise ValueError("Unsupported file type. Accepted types are CSV, PDF, PPTX and DOCX.")

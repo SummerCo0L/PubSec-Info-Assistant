@@ -263,7 +263,7 @@ export async function getTempImages(): Promise<string[]> {
 
 export async function postTd(file: File): Promise<String> {
     const formData = new FormData();
-    formData.append('csv', file);
+    formData.append('file', file);
 
     const response = await fetch('/posttd', {
         method: 'POST',
@@ -282,7 +282,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     let lastError;
 
     const formData = new FormData();
-    formData.append('csv', file);
+    formData.append('file', file);
 
     const response = await fetch('/posttd', {
         method: 'POST',

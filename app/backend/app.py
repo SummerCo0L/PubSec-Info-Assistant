@@ -35,10 +35,29 @@ from approaches.tabulardataassistant import (
     save_df,
     process_agent_response as td_agent_response,
     process_agent_scratch_pad as td_agent_scratch_pad,
-    get_images_in_temp
+    get_images_in_temp,
+    process_uploaded_file
 )
 from shared_code.status_log import State, StatusClassification, StatusLog
 from azure.cosmos import CosmosClient
+
+
+from approaches.tabulardataassistant import model
+# New helper for TDA processing when DF_FINAL is plain text
+def generate_response_tda(prompt: str) -> str:
+    """
+    A simplified function to generate a response for Tabular Data Assistant,
+    using a direct call to the model.
+    """
+    try:
+        # Assuming 'model' is already defined and configured as in tabulardataassistant.py
+        # You might need to import or configure it appropriately here.
+        response = model(prompt)
+        return response
+    except Exception as ex:
+        # You can log the exception if necessary
+        raise ex
+
 
 
 # === ENV Setup ===
@@ -88,7 +107,7 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "MAX_CSV_FILE_SIZE": "7",
+    "MAX_CSV_FILE_SIZE": "50",
     "LOCAL_DEBUG": "false",
     "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
@@ -688,26 +707,36 @@ async def getHint(question: Optional[str] = None):
     return results
 
 @app.post("/posttd")
-async def posttd(csv: UploadFile = File(...)):
+async def posttd(file: UploadFile = File(...)):
     try:
         global DF_FINAL
-            # Read the file into a pandas DataFrame
-        content = await csv.read()
-        df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
-
+        # content = await csv.read()
+        # df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
+        content = await file.read()
+        df = process_uploaded_file(content, file.filename)
         DF_FINAL = df
-        # Process the DataFrame...
+        # Save the result (either DataFrame or plain text)
         save_df(df)
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    
-    
     #return {"filename": csv.filename}
+
 @app.get("/process_td_agent_response")
 async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
     save_df(DF_FINAL)
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
+    
+    # If DF_FINAL is plain text, bypass the tabular processing helpers.
+    if isinstance(DF_FINAL, str):
+        combined_prompt = f"Context:\n{DF_FINAL}\n\nQuestion: {question}"
+        try:
+            results = generate_response_tda(combined_prompt)
+            return results
+        except Exception as ex:
+            log.exception("Error processing direct LLM response for plain text content")
+            raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
     for i in range(retries):
         try:
             results = td_agent_response(question,DF_FINAL)

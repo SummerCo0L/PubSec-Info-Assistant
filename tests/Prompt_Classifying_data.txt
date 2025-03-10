@@ -1,0 +1,53 @@
+Instructions in classifying data/ document into their data classification.
+
+Look through the uploaded document and answer the questions about the document in a logical manner from point 1.1 until you arrive at the first answer for the data classification. 
+
+1.1.    Does the data/ document consist of government/ stat board data? If yes, proceed to point 2.1. If no, proceed to point 2.2.
+2.1.    Does unauthorized disclosure of the data/ document cause damage to national security or interest? If yes, proceed to point 3.1. If no, proceed to point 3.2.
+2.2.    Is the data/ document meant to be kept to selected group, or could it cause some/ serious damage to an individual or business if disclosed? If yes, proceed to 6.1. If no, proceed to 6.2.
+3.1.    Does the data/ document consist of National Defence Policies or plans? If yes, proceed to point 4.1. If no, proceed to point 4.2.
+3.2.    Is the data/ document meant to be kept internal within government/ statutory board? If yes, proceed to point 7.1. If no, the security\ sensitive classification is �OFFICIAL (OPEN) \ NON-SENSITIVE�.
+4.1. 	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to point 5.1. If no, the security\ sensitive classification is �TOP SECRET \ NON-SENSITIVE�.
+4.2.	Does the data/ document consist of international relations or internal security matters? If yes, proceed to 13.1. If no, proceed to 13.2.
+5.1. 	Does the data include highly sensitive information? If yes, the security\ sensitive classification is �TOP SECRET \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �TOP SECRET \ SENSITIVE NORMAL�.
+6.1. 	Will unauthorized disclosure of the data/ document implicate external companies? If yes, the security\ sensitive classification is �ARES-[COMPANY] CONFIDENTIAL�. If no, the security\ sensitive classification is �ARES CONFIDENTIAL�.
+6.2. 	Is the data/ document meant to be kept private within A*STAR? If yes, the security\ sensitive classification is �ARES PRIVATE�. If no, the security\ sensitive classification is �ARES (Public)�.
+7.1. 	Will unauthorized disclosure of the data/ document likely cause serious damage to the Agency�s interests? If yes, proceed to 8.1. If no, proceed to 8.2.
+8.1. 	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to 9.1. If no, the security\ sensitive classification is �CONFIDENTIAL (CLOUD-ELIGIBLE) \ NON-SENSITIVE�.
+8.2.	Will unauthorized disclosure of information likely cause some damage to the Agency�s interests? If yes, proceed to 10.1. If no, proceed to 10.2.
+9.1. 	Does the data/ document include highly sensitive information? If yes, the security\ sensitive classification is �CONFIDENTIAL (CLOUD-ELIGIBLE) \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �CONFIDENTIAL (CLOUD- ELIGIBLE) \ SENSITIVE NORMAL�.
+10.1.	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to 11.1. If no, the security\ sensitive classification is �RESTRICTED \ NON-SENSITIVE�.
+10.2. 	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to 12.1. if no, the security\ sensitive classification is �OFFICIAL (CLOSED) \ NON-SENSITIVE�.
+11.1. 	Does the data/ document include highly sensitive information? If yes, the security\ sensitive classification is �RESTRICTED \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �RESTRICTED \ SENSITIVE NORMAL�.
+12.1. 	Does the data/ document include highly sensitive information? If yes, the security\ sensitive classification is �OFFICIAL (CLOSED) \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �OFFICIAL (CLOSED) \ SENSITIVE NORMAL�.
+13.1. 	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to 14.1. If no, the security\ sensitive classification is �SECRET \ NON-SENSITIVE�.
+13.2. 	Does the data/ document consist of sensitive individual/ entity data? If yes, proceed to 15.1. If no, the security\ sensitive classification is �CONFIDENTIAL \ NON-SENSITIVE�.
+14.1.	Does the data/ document include highly sensitive information? If yes, the security\ sensitive classification is �SECRET \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �SECRET \ SENSITIVE NORMAL�.
+15.1. 	Does the data/ document include highly sensitive information? If yes, the security\ sensitive classification is �CONFIDENTIAL \ SENSITIVE HIGH�. If no, the security\ sensitive classification is �CONFIDENTIAL \ SENSITIVE NORMAL�.
+
+Your answer for the data classification should be one of the following below. Accompany the answer with an explanation how you arrive at the answer based on the steps outlined in the pointers above.
+{
+�ARES (Public)�,
+�ARES PRIVATE�, 
+�ARES-[COMPANY] CONFIDENTIAL�, 
+�ARES CONFIDENTIAL�, 
+�OFFICIAL (OPEN) \ NON-SENSITIVE�,
+�OFFICIAL (CLOSED) \ NON-SENSITIVE�, 
+�OFFICIAL (CLOSED) \ SENSITIVE NORMAL�,
+�OFFICIAL (CLOSED) \ SENSITIVE HIGH�, 
+�RESTRICTED \ NON-SENSITIVE�,
+�RESTRICTED \ SENSITIVE NORMAL�,
+�RESTRICTED \ SENSITIVE HIGH�,
+�CONFIDENTIAL \ NON-SENSITIVE�,
+�CONFIDENTIAL \ SENSITIVE HIGH�,
+�CONFIDENTIAL \ SENSITIVE NORMAL�,
+�CONFIDENTIAL (CLOUD-ELIGIBLE) \ NON-SENSITIVE�,
+�CONFIDENTIAL (CLOUD- ELIGIBLE) \ SENSITIVE NORMAL�,
+�CONFIDENTIAL (CLOUD-ELIGIBLE) \ SENSITIVE HIGH�,
+�SECRET \ NON-SENSITIVE�,
+�SECRET \ SENSITIVE NORMAL�,
+�SECRET \ SENSITIVE HIGH�,
+�TOP SECRET \ NON-SENSITIVE�, 
+�TOP SECRET \ SENSITIVE NORMAL�, 
+�TOP SECRET \ SENSITIVE HIGH�
+}

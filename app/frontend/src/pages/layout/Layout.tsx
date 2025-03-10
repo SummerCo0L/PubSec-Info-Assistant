@@ -59,9 +59,10 @@ export const Layout = () => {
                             {featureFlags?.ENABLE_TABULAR_DATA_ASSISTANT &&
                                 <li className={styles.headerNavLeftMargin}>
                                     <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Tabular Data Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
+                                    {/* Tabular Data Assistant */}
+                                    Data Classification
+                                    {/* <br />  
+                                    <p className={styles.centered}>(preview)</p> */}
                                     </NavLink>
                                     
                                       

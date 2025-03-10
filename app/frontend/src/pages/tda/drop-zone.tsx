@@ -25,9 +25,9 @@ const Banner = ({ onClick, onDrop }: {onClick: any, onDrop: any}) => {
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <span className={styles.banner_text}>Click to Add csv file</span>
+      <span className={styles.banner_text}>Click to Add file</span>
       <span className={styles.banner_text}>Or</span>
-      <span className={styles.banner_text}>Drag and Drop csv file here</span>
+      <span className={styles.banner_text}>Drag and Drop file here</span>
     </div>
   );
 };
